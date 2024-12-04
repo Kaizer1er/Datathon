@@ -141,6 +141,19 @@
             margin-top: 20px;
             border-radius: 10px;
         }
+        #reservation-button button {
+            background-color: #4CAF50; /* Couleur de fond */
+            color: white; /* Couleur du texte */
+            padding: 5px 15px; /* Espacement */
+            border: none; /* Suppression des bordures */
+            border-radius: 5px; /* Coins arrondis */
+            cursor: pointer; /* Curseur de la souris */
+            font-size: 14px;
+        }
+    
+        #reservation-button button:hover {
+            background-color: #45a049; /* Changement de couleur au survol */
+        }
     </style>
 </head>
 
@@ -150,11 +163,12 @@
     </header>
 
     <div class="description">
-        <p>
-            Découvrez la Normandie tout en réduisant votre empreinte carbone.
-            À pied, à vélo ou en transports en commun, explorez nos paysages magnifiques
-            et notre riche patrimoine culturel de manière écoresponsable.
-        </p>
+        Découvrez la Normandie tout en réduisant votre empreinte carbone. Explorez nos paysages magnifiques et notre riche patrimoine culturel de manière écoresponsable.
+        <br>
+        <p>Pour promouvoir le tourisme durable, nous vous proposons des parcours guidés pour découvrir des sites incontournables, 
+            en utilisant des modes de transport écologiques : vélo, à pied ou en transports en commun. 
+            La base de données sera alimentée par les visiteurs et les résidents qui partageront leurs parcours. 
+            Ainsi, nous pourrons offrir des milliers de parcours adaptés aux différents centres d'intérêt touristiques (culture, nature, etc.).</p>
     </div>
 
     <div class="departments">
@@ -221,6 +235,11 @@
             <div><img
                     src="https://st5.depositphotos.com/65404274/72979/v/450/depositphotos_729793858-stock-illustration-public-bus-stop-icon-shuttle.jpg"
                     alt="En transport"> <span id="public-transport-duration">N/A</span></div>
+        </div>
+        <div>
+            <a href="https://www.laclefverte.org/recherche/?types%5B%5D=1&locations%5B%5D=Normandie" target="_blank" id="reservation-button">
+                <button>Réserver un hébergement</button>
+            </a>
         </div>
         <div id="map"></div>
     </div>
