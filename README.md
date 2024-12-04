@@ -9,7 +9,8 @@ Pour cette édition, le challenge va porter sur la valorisation du patrimoine cu
 Patrimoine architectural : https://opendata.normandie.fr/datasets/adaac25183cc4c8b8dc196066b3a085d_0/explore
 Patrimoine mobilier : https://opendata.normandie.fr/datasets/87960e59d4464218803b653214260730_0/explore
 
-# 2. Base de données touristique normande commune à la Région, aux cinq départements et à l’ensemble des Offices de tourisme normands (depuis Datatourisme.fr : https://www.datatourisme.fr || depuis data.gouv.fr : https://www.data.gouv.fr/), flux XML à venir pour accéder par type d'objet touristique, fichiers Excel possibles sur demande). 
+# 2. Base de données touristique normande commune à la Région, aux cinq départements et à l’ensemble des Offices de tourisme normands
+(depuis Datatourisme.fr :https://www.datatourisme.fr || depuis data.gouv.fr : https://www.data.gouv.fr/), flux XML à venir pour accéder par type d'objet touristique, fichiers Excel possibles sur demande). 
 
 # 3. L’API pour accéder aux données de la mobilité du MaaS du syndicat mixte Atoumod (accès via le Swagger : https://api.atm.cityway.fr/dataflow/swagger/index.html)
 https://transport.data.gouv.fr/datasets/base-de-donnees-multimodale-des-reseaux-de-transport-public-normands   
