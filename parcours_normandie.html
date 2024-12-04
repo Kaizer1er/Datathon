@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activités Éco-Responsables en Normandie</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            text-align: center;
+            background-color: #2e8b57;
+            color: white;
+            padding: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin: 0;
+        }
+
+        .description {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            color: #555;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .departments {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .department-card {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .department-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            animation: slide 16s infinite;
+        }
+
+        .department-card h2 {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 1.5em;
+        }
+
+        @keyframes slide {
+            0% {
+                opacity: 1;
+            }
+
+            25% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            75% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .details {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        .details h2 {
+            color: #2e8b57;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .details p {
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .transport-icons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .transport-icons div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .transport-icons img {
+            width: 24px;
+            height: 24px;
+        }
+        #map {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Activités Éco-Responsables en Normandie</h1>
+    </header>
+
+    <div class="description">
+        <p>
+            Découvrez la Normandie tout en réduisant votre empreinte carbone.
+            À pied, à vélo ou en transports en commun, explorez nos paysages magnifiques
+            et notre riche patrimoine culturel de manière écoresponsable.
+        </p>
+    </div>
+
+    <div class="departments">
+        <!-- Rouen -->
+        <div class="department-card"
+            onclick="showDetails('Rouen', `Rouen Éco-Patrimoine : Découverte des sites incontournables`, `Parcourez Rouen en toute sérénité, à vèlo ou en transport en commun, pour découvrir des sites emblématiques comme la Cathédrale Notre-Dame et le panorama de la Côte Sainte-Catherine. Une balade qui allie patrimoine et respect de l'environnement.`)">
+            <img src="https://www.petitfute.com/medias/mag/31314/originale/AdobeStock_231135133-1024x683.jpeg"
+                alt="Rouen">
+            <img src="https://cdn.generationvoyage.fr/2020/08/Une-Rouen-S-F-768x512.jpg" alt="Rouen">
+            <img src="https://cloetclem.fr/wp-content/uploads/2019/06/IMG_9105.jpg" alt="Rouen">
+            <h2>Rouen</h2>
+        </div>
+        <!-- Caen -->
+        <div class="department-card"
+            onclick="showDetails('Caen', `Caen Éco-Culture : Sur les traces de Guillaume`, `Découvrez Caen à vélo ou en transport en commun, avec des sites comme le Château de Caen et l’Abbaye aux Hommes, pour une plongée dans l’histoire normande.`)">
+            <img src="https://www.caenlamer-tourisme.fr/wp-content/uploads/2020/10/54530-abbaye_aux_hommes-caen_la_mer_tourisme___les_conteurs_droits_reserves_office_de_tourisme___des_congres-1920x1080-1.jpg"
+                alt="Caen">
+            <img src="https://www.caenlamer-tourisme.fr/wp-content/uploads/wpetourisme/visite-guidee-primaires.jpg"
+                alt="Caen">
+            <img src="https://www.parcsetjardins.fr/data/cache/GardenPicture/picture/main/8/7/478.1606316616.jpg"
+                alt="Caen">
+            <h2>Caen</h2>
+        </div>
+        <!-- Alençon -->
+        <div class="department-card"
+            onclick="showDetails('Alençon', `Alençon Nature et Patrimoine`, `Explorez Alençon à vélo ou en transport en commun, avec des lieux uniques comme la Basilique Notre-Dame et le Parc des Promenades. Parfait pour un moment paisible et enrichissant.`)">
+            <img src="https://maville.com/photosmvi/2024/08/06/P34503379D6411823G.jpg" alt="Alençon">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/25/Parc_Promenades_Alen%C3%A7on_02.JPG"
+                alt="Alençon">
+            <img src="https://cu-alencon.fr/fileadmin/_processed_/1/6/csm_sorties_temps_libre_-equipements_culturels_-_musee_dentelles__2__01_c15da2a8dc.jpg"
+                alt="Alençon">
+            <h2>Alençon</h2>
+        </div>
+        <!-- Évreux -->
+        <div class="department-card"
+            onclick="showDetails('Évreux', `Évreux Éco-Balade`, `Parcourez Évreux à vélo a en transport en commun, avec des sites comme la Cathédrale Notre-Dame et les rives de l’Iton pour une balade apaisante et écoresponsable.`)">
+            <img src="https://www.lecomptoirdesloisirs-evreux.fr/wp-content/uploads/wpetourisme/rdc-3-thierry-bouffies.jpeg"
+                alt="Évreux">
+            <img src="https://www.lecomptoirdesloisirs-evreux.fr/wp-content/uploads/wpetourisme/Cathedrale-Notre-Dame-Evreux-Normandie---OTC-Grand-evreux.jpg"
+                alt="Évreux">
+            <img src="https://evreux.fr/wp-content/uploads/2019/03/berges-amenagees-de-l-iton.jpg" alt="Évreux">
+            <h2>Évreux</h2>
+        </div>
+        <!-- Saint-Lô -->
+        <div class="department-card"
+            onclick="showDetails('Saint-Lô', `Saint-Lô Éco-Nature`, `Découvrez Saint-Lô et ses alentours à vélo ou en transport en commun, avec des lieux comme les remparts historiques et la vallée de la Vire pour une escapade nature.`)">
+            <img src="https://www.attitude-manche.fr/wp-content/uploads/2022/10/haras-saint-lo-2-460x280.jpg"
+                alt="Saint-Lô">
+            <img src="https://www.normandie-tourisme.fr/app/uploads/2022/12/remparts-fortifications-saint-lo-anibas-photography.jpg"
+                alt="Saint-Lô">
+            <img src="https://www.pointdevue.fr/storage/images/article_960/2024/09/%C3%89curies_du_haras_national_de_Saint-L%C3%B4_-_Embl%C3%A9matique_2024_(Normandie)_(1)QcqylafYyh.jpg"
+                alt="Saint-Lô">
+            <h2>Saint-Lô</h2>
+        </div>
+    </div>
+
+    <div class="details" id="details">
+        <h2 id="details-title"></h2>
+        <p id="details-description"></p>
+        <div class="transport-icons">
+            <div><img
+                    src="https://media.istockphoto.com/id/1268356101/fr/vectoriel/ic%C3%B4ne-de-v%C3%A9lo-logo-vector-design-mod%C3%A8le-de-style-plat-%C3%A0-la-mode.jpg?s=612x612&w=0&k=20&c=BpH5nhxdWDvwP6s0VBRDYZLuFKiDafkuX8tY-uLt_IQ="
+                    alt="À vélo"> <span id="cycling-duration">N/A</span></div>
+            <div><img
+                    src="https://st5.depositphotos.com/65404274/72979/v/450/depositphotos_729793858-stock-illustration-public-bus-stop-icon-shuttle.jpg"
+                    alt="En transport"> <span id="public-transport-duration">N/A</span></div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <script>
+        let map;
+        async function fetchGeoJSON() {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/abdilabd/test/main/Parcours_Normadie.geojson');
+                if (!response.ok) throw new Error('Erreur de récupération des données');
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur lors de la récupération du fichier GeoJSON :', error);
+                return null;
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Rayon de la Terre en km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance en km
+        }
+
+        async function calculateDurations(city) {
+            const geojson = await fetchGeoJSON();
+            if (!geojson) return { walking: 'N/A', cycling: 'N/A', publicTransport: 'N/A' };
+
+            const cityData = geojson.features.filter(feature => {
+                const cityName = feature.properties?.Ville?.trim().toLowerCase();
+                return cityName === city.trim().toLowerCase();
+            });
+
+            if (cityData.length === 0) {
+                console.warn(`Aucune donnée trouvée pour la ville : ${city}`);
+                return { walking: 'N/A', cycling: 'N/A', publicTransport: 'N/A' };
+            }
+
+            let totalDistance = 0;
+            for (let i = 0; i < cityData.length - 1; i++) {
+                const coords1 = cityData[i].geometry.coordinates;
+                const coords2 = cityData[i + 1].geometry.coordinates;
+                if (coords1.length === 2 && coords2.length === 2) {
+                    const [lon1, lat1] = coords1;
+                    const [lon2, lat2] = coords2;
+                    totalDistance += calculateDistance(lat1, lon1, lat2, lon2);
+                }
+            }
+
+            if (totalDistance === 0) return {cycling: 'N/A', publicTransport: 'N/A' };
+
+            const distanceText = ` (${totalDistance.toFixed(2)} km)`;
+
+            return {
+                cycling: Math.round((totalDistance / 15) * 60) + ' min' + distanceText,
+                publicTransport: Math.round((totalDistance / 30) * 60) + ' min' + distanceText,
+            };
+        }
+
+        async function showDetails(city, title, description) {
+            const details = document.getElementById('details');
+            document.getElementById('details-title').textContent = title;
+            document.getElementById('details-description').textContent = description;
+
+            const geojson = await fetchGeoJSON();
+            const cityData = geojson.features.filter(feature => feature.properties?.Ville?.trim().toLowerCase() === city.trim().toLowerCase());
+
+            if (cityData.length === 0) {
+                console.error('Aucune donnée trouvée pour la ville :', city);
+                return;
+            }
+
+            // Si une carte existe déjà, la supprimer avant d'en créer une nouvelle
+            if (map) {
+                map.remove();
+            }
+
+            // Initialiser une nouvelle carte
+            map = L.map('map').setView([49.182863, -0.370679], 13); // Coordonnées par défaut
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+
+            // Ajouter les points de la ville sur la carte avec des icônes personnalisées
+            cityData.forEach(feature => {
+                const [lon, lat] = feature.geometry.coordinates;
+                const imageUrl = feature.properties.images; // URL de l'image spécifique
+
+                // Créer une icône personnalisée pour chaque marqueur
+                const customIcon = L.icon({
+                    iconUrl: imageUrl,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -32]
+                });
+
+                // Ajouter un marqueur avec l'icône personnalisée
+                L.marker([lat, lon], { icon: customIcon })
+                    .addTo(map)
+                    .bindPopup(`${feature.properties['Nom du site']}`)
+                    .openPopup();
+            })
+
+            // Ajuster la vue pour contenir tous les marqueurs
+            const bounds = L.latLngBounds(cityData.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]));
+            map.fitBounds(bounds);
+            try {
+                const durations = await calculateDurations(city);
+                document.getElementById('cycling-duration').textContent = durations.cycling;
+                document.getElementById('public-transport-duration').textContent = durations.publicTransport;
+            } catch (error) {
+                console.error('Erreur dans la récupération des durées:', error);
+            }
+            details.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
