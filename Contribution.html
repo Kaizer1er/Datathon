@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de patrimoine avec géolocalisation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        input,
+        textarea,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #0056b3;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color:#28a745;
+        }
+
+        .input-container {
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            padding: 10px;
+        }
+
+        .geo-location-btn {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .geo-location-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="form-container">
+        <h2>Formulaire de patrimoine</h2>
+
+        <form id="patrimoineForm">
+            <!-- Nom de l'utilisateur (optionnel) -->
+            <div class="input-container">
+                <label for="userName">Nom de l'utilisateur (optionnel)</label>
+                <input type="text" id="userName" name="userName" placeholder="Votre nom" />
+            </div>
+
+            <!-- Nom du patrimoine -->
+            <div class="input-container">
+                <label for="patrimoineName">Nom du patrimoine</label>
+                <input type="text" id="patrimoineName" name="patrimoineName" placeholder="Nom du patrimoine" required />
+            </div>
+
+            <!-- Date ajoutée automatiquement -->
+            <div class="input-container">
+                <label for="dateField">Date d'envoi</label>
+                <input type="text" id="dateField" name="dateField" readonly />
+            </div>
+
+            <!-- Photo du patrimoine -->
+            <div class="input-container">
+                <label for="patrimoinePhoto">Photo du patrimoine</label>
+                <input type="file" id="patrimoinePhoto" name="patrimoinePhoto" class="file-input" accept="image/*" required />
+            </div>
+
+            <!-- Localisation du patrimoine -->
+            <div class="input-container">
+                <label for="latitude">Latitude</label>
+                <input type="text" id="latitude" name="latitude" placeholder="Latitude" required />
+            </div>
+            <div class="input-container">
+                <label for="longitude">Longitude</label>
+                <input type="text" id="longitude" name="longitude" placeholder="Longitude" required />
+            </div>
+
+            <button type="button" class="geo-location-btn" onclick="getCurrentLocation()">Obtenir ma localisation</button>
+
+            <!-- Descriptif du patrimoine (optionnel) -->
+            <div class="input-container">
+                <label for="description">Descriptif (optionnel)</label>
+                <textarea id="description" name="description" placeholder="Ajoutez un descriptif du patrimoine" rows="4"></textarea>
+            </div>
+
+            <!-- Bouton d'envoi -->
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+
+    <script>
+        // Fonction pour obtenir la localisation actuelle
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    // Remplir les champs latitude et longitude
+                    document.getElementById('latitude').value = latitude;
+                    document.getElementById('longitude').value = longitude;
+
+                    alert("Localisation obtenue : " + latitude + ", " + longitude);
+                }, function (error) {
+                    alert("Erreur lors de l'obtention de la localisation : " + error.message);
+                });
+            } else {
+                alert("La géolocalisation n'est pas supportée par ce navigateur.");
+            }
+        }
+
+        // Remplir automatiquement le champ date lors du chargement de la page
+        document.addEventListener("DOMContentLoaded", function () {
+            const dateField = document.getElementById("dateField");
+            const currentDate = new Date().toLocaleDateString("fr-FR"); // Format de la date : DD/MM/YYYY
+            dateField.value = currentDate;
+        });
+
+        // Exemple de gestion de l'envoi du formulaire
+        document.getElementById("patrimoineForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Empêcher le formulaire de se soumettre de manière classique
+
+            const formData = new FormData(document.getElementById("patrimoineForm"));
+
+            console.log("Formulaire soumis :", Object.fromEntries(formData.entries()));
+            alert("Le formulaire a été soumis avec succès !");
+        });
+    </script>
+
+</body>
+</html>

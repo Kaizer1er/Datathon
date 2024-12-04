@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Norm'Aventure</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-maptiler-layer@1.0.0/dist/leaflet-maptiler-layer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <style>
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        /* Personnalisation des pop-ups */
+        .leaflet-popup-content {
+            background-color: none;
+            border: 2px solid #0078d4;
+            border-radius: 20px;
+            padding: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            max-width: 300px;
+            color: #333;
+            text-align: center;
+        }
+
+        .leaflet-popup-tip {
+            background-color: #0078d4;
+        }
+
+        .leaflet-popup-content .popup-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .leaflet-popup-content .popup-description {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .leaflet-popup-content img {
+            width: 5rem;
+            height: 5rem;
+            margin-top: 10px;
+            border-radius: 50%;
+        }
+
+        .leaflet-popup-content a {
+            display: inline-block;
+            margin-top: 10px;
+            color: #0078d4;
+            text-decoration: none;
+        }
+
+        .leaflet-popup-content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Layers - Style*/
+        .layer-toggle {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            background-color: #333;
+            color: white;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Controleur - Style temporel*/
+        .time-control {
+            position: absolute;
+            left: 1px;
+            bottom: 1px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #8f8e8e;
+            border-radius: 20px;
+            box-shadow: 1px 1px 2px #000000;
+            vertical-align: middle;
+            font-family: sans-serif;
+            font-size: 12px;
+            padding: 8px;
+        }
+
+        /* Couleur - Activer/ Desactiver */
+        .layer-toggle.active {
+            background-color: #28a745;
+        }
+
+        /* Géocodage - Style du champ de recherche */
+        .leaflet-control-geocoder {
+            font-family: cambria;
+            font-size: 14px;
+        }
+
+        /* Isochrones - Style */
+        #isochroneControls {
+            position: absolute;
+            top: 50%;
+            /* Centrer verticalement */
+            left: 10px;
+            /* Garder l'écart à gauche */
+            transform: translateY(-50%);
+            z-index: 1000;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 10px
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            display: block;
+        }
+
+        button:hover {
+            background-color: #208103;
+        }
+
+        /* Style du bouton réinitialiser dans le même cadre */
+        #resetButton {
+            background-color: #208103;
+            color: white;
+            border-radius: 10px;
+            width: 120px;
+            height: 35px;
+            font-size: 14px;
+            cursor: pointer
+        }
+
+        #resetButton:hover {
+            background-color: #007bff
+        }
+
+        #filtreButton {
+            background-color: #208103;
+            color: white;
+            border-radius: 10px;
+            width: 120px;
+            height: 35px;
+            font-size: 14px;
+            cursor: pointer
+        }
+
+        #filtreButton:hover {
+            background-color: #007bff
+        }
+
+        .layer-toggle-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+
+        .layer-toggle {
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .layer-toggle:hover {
+            background-color: #208103;
+        }
+
+        .layer-toggle.active {
+            background-color: #5d5d5d;
+            color: white;
+        }
+
+        .search-container {
+            z-index: 999;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 200px;
+            padding: 5px;
+            margin: 5px 0;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            background: white;
+            max-height: 100px;
+            overflow-y: auto;
+            width: calc(30%);
+            z-index: 1001;
+            list-style-type: none;
+            margin: 170px 0 0;
+        }
+
+        .autocomplete-suggestions li {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestions li:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .sidebar {
+            position: absolute;
+            margin-top: 10px;
+            left: -350px;
+            width: 285px;
+            height: 482px;
+            background-color: rgba(255, 255, 255, 0.816);
+            box-shadow: 2px 0 5px;
+            border-radius: 50px;
+            overflow-y: auto;
+            text-align: center;
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* Style du sidebar */
+        .sidebar.active {
+            left: 0;
+        }
+
+        #closeSidebar {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        #closeSidebar:hover {
+            color: #9a4141;
+        }
+
+        /* Style pour la liste des patrimoines */
+        #patrimoineList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #patrimoineList li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-radius: 20px;
+        }
+
+        #patrimoineList li:hover {
+            background-color: #9a4141;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Zone de la carte -->
+    <div id="map"></div>
+    <div class="search-container">
+        <input type="text" id="startAddress" placeholder="Départ" autocomplete="off" />
+        <ul id="startSuggestions" class="autocomplete-suggestions"></ul>
+        <button id="searchStart"></button>
+        <br>
+        <input type="text" id="endAddress" placeholder="Arrivée" autocomplete="off" />
+        <ul id="endSuggestions" class="autocomplete-suggestions"></ul>
+        <button id="searchEnd"></button>
+        <button id="traceRoute">Tracer l'itinéraire</button>
+        <!-- Bouton Réinitialiser dans le même cadre -->
+        <button id="resetButton">Réinitialiser</button>
+        <!-- Bouton Filtre dans le même cadre -->
+        <button id="filtreButton" onclick="openFilterPage()">Filtrez ici📌</button>
+    </div>
+    <!-- Liste des partimoine -->
+    <div id="sidebar" class="sidebar">
+        <button id="closeSidebar" onclick="toggleSidebar(false)">×</button>
+        <h3>Liste des Patrimoines</h3>
+        <ul id="patrimoineList"></ul>
+    </div>
+    <div id="isochroneControls">
+        <button onclick="toggleIsochrones(900)">15🕒</button>
+        <button onclick="toggleIsochrones(1800)">30🕝</button>
+        <button onclick="toggleIsochrones(2700)">45🕗</button>
+        <button onclick="toggleIsochrones(3600)">1🕕</button>
+    </div>
+    <!-- Contrôles temporels -->
+    <div class="time-control">
+        Temporalité
+        <input id="date" type="range" min="1" max="365" step="1">
+        <label for="date"></label>
+        <input id="time" type="range" min="0" max="23" step="1">
+        <label for="time"></label>
+    </div>
+
+    <script>
+        function openFilterPage() {
+            // Ouvre le fichier filtre.html dans un nouvel onglet
+            window.open('filtre.html', '_blank');
+        }
+        // Styles pour Mobilier, Architecture
+        var MobilierStyle = {
+            color: '#FF5733',
+            fillOpacity: 1,
+            radius: 3
+        };
+
+        var ArchitectureStyle = {
+            color: '#3375FF',
+            fillOpacity: 1,
+            radius: 2
+        };
+
+        // Initialisation de la carte
+        var map = L.map('map', {
+            center: [49.2288, -0.094821],
+            zoom: 8.4,
+        });
+
+        // Couche de tuiles Satellite
+        var Claire = L.tileLayer('https://api.maptiler.com/maps/topo-v2/{z}/{x}/{y}.png?key=2yXOGfpOeGCzI0c7MDKp', {
+            attribution: '<a href="https://www.maptiler.com/copyright" target="_blank"></a> <a href="https://www.openstreetmap.org/copyright" target="_blank"></a>'
+        }).addTo(map);
+
+        // Couche de tuiles Sombre
+        var Sombre = L.tileLayer('https://tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token=fbHr4ScybbgkRVg27GfanQo3W7Mf2r9QCoP9Df2uxIznXIHBmnHH1eAfSBY8xBUX', {
+            attribution: '<a href="https://www.jawg.io?utm_medium=map&utm_source=attribution" target="_blank"></a> - <a href="https://www.openstreetmap.org?utm_medium=map-attribution&utm_source=jawg" target="_blank"></a>'
+        });
+
+        // Contrôle des couches
+        var baseMaps = {
+            "Claire": Claire,
+            "Sombre": Sombre,
+        };
+        L.control.layers(baseMaps).addTo(map);
+        // OSM Batiments 3D
+        var osmb = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
+
+        let startMarker, endMarker, routingControl;
+
+        // API OpenRouteService
+        const orsApiKey = '5b3ce3597851110001cf6248edb706190c704a56ac5ecf1a4daf78fd';
+        const url = 'https://api.openrouteservice.org/v2/isochrones/driving-car';
+
+        let userLocation = null; // Stocker la position de l'utilisateur
+        let isochroneLayers = {}; // Utiliser un objet pour stocker les isochrones par durée
+
+        // Localiser l'utilisateur dès le chargement de la page
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                userLocation = [position.coords.longitude, position.coords.latitude];
+                map.setView([position.coords.latitude, position.coords.longitude], 18);
+
+                // Ajouter un marqueur pour la position de l'utilisateur
+                L.marker([position.coords.latitude, position.coords.longitude], {
+                    title: "Votre position"
+                }).addTo(map);
+            }, error => {
+                alert("Localisation impossible");
+            });
+        } else {
+            alert("Conflit géolocalisation et navigateur.");
+        }
+
+        // Fonction pour générer les isochrones
+        function toggleIsochrones(duration) {
+            if (!userLocation) {
+                alert("Votre position non définie.");
+                return;
+            }
+
+            // Si l'isochrone pour cette durée est déjà ajouté, le retirer
+            if (isochroneLayers[duration]) {
+                isochroneLayers[duration].forEach(layer => map.removeLayer(layer));
+                delete isochroneLayers[duration]; // Supprimer de l'objet
+            } else {
+                // Sinon, générer et ajouter l'isochrone
+                generateIsochrones(duration);
+            }
+        }
+
+        // Fonction pour générer un isochrone et l'ajouter à la carte
+        function generateIsochrones(duration) {
+            // Préparer les données pour l'API
+            const requestBody = {
+                locations: [userLocation], // Position de l'utilisateur
+                range: [duration], // Durée en secondes
+                range_type: "time"
+            };
+
+            // Envoyer la requête à l'API OpenRouteService
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': orsApiKey
+                },
+                body: JSON.stringify(requestBody)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erreur API : ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Réponse des isochrones :', data);
+
+                    // Déterminer la couleur du buffer
+                    const colors = {
+                        900: '#00ff00', // 15 mins
+                        1800: '#ffff00', // 30 mins
+                        2700: '#ffa500', // 45 mins
+                        3600: '#ff0000' // 1 heure
+                    };
+                    const color = colors[duration] || '#0000ff';
+
+                    // Ajouter les isochrones à la carte
+                    const layerArray = data.features.map(feature => {
+                        const layer = L.geoJSON(feature, {
+                            style: {
+                                color: color,
+                                weight: 2,
+                                fillOpacity: 0.2
+                            }
+                        }).addTo(map);
+                        return layer; // Les isochrones à la carte
+                    });
+
+                    // Sauvegarder les isochrones dans l'objet
+                    isochroneLayers[duration] = layerArray;
+                })
+        }
+
+        // Fonction pour localiser l'utilisateur
+        function locateUser() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    userLocation = [position.coords.longitude, position.coords.latitude];
+                    map.setView([userLocation[1], userLocation[0]], 13);
+
+                    // Ajouter un marqueur pour la position utilisateur
+                    L.marker([userLocation[1], userLocation[0]], {
+                        title: "Vous êtes ici"
+                    }).addTo(map);
+
+                    console.log("Localisation trouvée :", userLocation);
+                }, function (error) {
+                    alert("Impossible de récupérer votre localisation.");
+                });
+            } else {
+                alert("Géolocalisation non prise en charge par votre navigateur.");
+            }
+        }
+        // Fonction de adressage
+        async function geocode(address) {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.length > 0) {
+                return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+            }
+            return null;
+        }
+        // Fonction de géocodage avec Nominatim
+        async function geocode(query) {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.length > 0) {
+                    const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                    return coords;
+                }
+            }
+            return null;
+        }
+
+        // Fonction d'autocomplétion
+        async function autocomplete(query, suggestionsList) {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const results = await response.json();
+                suggestionsList.innerHTML = ''; // Réinitialiser les suggestions
+                results.forEach(result => {
+                    const li = document.createElement('li');
+                    li.textContent = result.display_name;
+                    li.addEventListener('click', () => {
+                        // Mettre à jour l'input avec le choix de l'utilisateur
+                        const inputId = suggestionsList.id.includes('start') ? 'startAddress' : 'endAddress';
+                        document.getElementById(inputId).value = result.display_name;
+
+                        // Placer le marqueur correspondant
+                        const coords = [parseFloat(result.lat), parseFloat(result.lon)];
+                        if (inputId === 'startAddress') {
+                            if (startMarker) startMarker.setLatLng(coords);
+                            else startMarker = L.marker(coords, { draggable: true }).addTo(map).bindPopup('Départ').openPopup();
+                        } else {
+                            if (endMarker) endMarker.setLatLng(coords);
+                            else endMarker = L.marker(coords, { draggable: true }).addTo(map).bindPopup('Arrivée').openPopup();
+                        }
+
+                        map.setView(coords, 13); // Centrer la carte
+                        suggestionsList.innerHTML = ''; // Fermer la liste des suggestions
+                    });
+                    suggestionsList.appendChild(li);
+                });
+            }
+        }
+
+        // Gestion des champs d'adresse pour l'autocomplétion
+        document.getElementById('startAddress').addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            const suggestionsList = document.getElementById('startSuggestions');
+            if (query.length < 3) {
+                suggestionsList.innerHTML = '';
+                return;
+            }
+            autocomplete(query, suggestionsList);
+        });
+
+        document.getElementById('endAddress').addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            const suggestionsList = document.getElementById('endSuggestions');
+            if (query.length < 3) {
+                suggestionsList.innerHTML = '';
+                return;
+            }
+            autocomplete(query, suggestionsList);
+        });
+
+        // Recherche de l'adresse de départ
+        document.getElementById('searchStart').addEventListener('click', async () => {
+            const address = document.getElementById('startAddress').value;
+            if (!address) {
+                alert('Veuillez saisir une adresse de départ.');
+                return;
+            }
+            const coords = await geocode(address);
+            if (coords) {
+                if (!startMarker) {
+                    startMarker = L.marker(coords, { draggable: true }).addTo(map).bindPopup('Départ').openPopup();
+                } else {
+                    startMarker.setLatLng(coords).bindPopup('Départ').openPopup();
+                }
+                map.setView(coords, 13);
+            } else {
+                alert('Adresse de départ introuvable.');
+            }
+        });
+
+        // Recherche de l'adresse d'arrivée
+        document.getElementById('searchEnd').addEventListener('click', async () => {
+            const address = document.getElementById('endAddress').value;
+            if (!address) {
+                alert("Veuillez saisir une adresse d'arrivée.");
+                return;
+            }
+            const coords = await geocode(address);
+            if (coords) {
+                if (!endMarker) {
+                    endMarker = L.marker(coords, { draggable: true }).addTo(map).bindPopup('Arrivée').openPopup();
+                } else {
+                    endMarker.setLatLng(coords).bindPopup('Arrivée').openPopup();
+                }
+                map.setView(coords, 13);
+            } else {
+                alert("Adresse d'arrivée introuvable.");
+            }
+        });
+
+        // Traçage de l'itinéraire
+        document.getElementById('traceRoute').addEventListener('click', async () => {
+            if (!startMarker || !endMarker) {
+                alert('Veuillez définir des adresses de départ et d\'arrivée.');
+                return;
+            }
+
+            const startCoords = startMarker.getLatLng();
+            const endCoords = endMarker.getLatLng();
+
+            // Supprimer l'ancien itinéraire s'il existe
+            if (routingControl) map.removeControl(routingControl);
+
+            // Configurer le calcul de l'itinéraire
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(startCoords.lat, startCoords.lng),
+                    L.latLng(endCoords.lat, endCoords.lng)
+                ],
+                router: L.Routing.osrmv1({
+                    serviceUrl: 'https://router.project-osrm.org/route/v1',
+                    language: 'fr' // Instructions en français
+                }),
+                routeWhileDragging: false,
+                showAlternatives: false,
+                createMarker: function (i, waypoint, n) {
+                    const icon = i === 0 ? 'Départ' : i === n - 1 ? 'Arrivée' : `Étape ${i}`;
+                    return L.marker(waypoint.latLng).bindPopup(icon);
+                }
+            }).addTo(map);
+
+            // Afficher les détails de l'itinéraire (distance, durée)
+            routingControl.on('routesfound', function (e) {
+                const route = e.routes[0];
+                const distance = (route.summary.totalDistance / 1000).toFixed(2); // en km
+                const duration = (route.summary.totalTime / 60).toFixed(1); // en minutes
+
+                alert(`Distance : ${distance} km | Durée estimée : ${duration} minutes.`);
+            });
+        });
+
+        // Réinitialiser la carte et les marqueurs d'itinéraire
+        document.getElementById('resetButton').addEventListener('click', () => {
+            if (startMarker) {
+                map.removeLayer(startMarker);
+                startMarker = null;
+            }
+            if (endMarker) {
+                map.removeLayer(endMarker);
+                endMarker = null;
+            }
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+
+            // Réinitialiser les champs
+            document.getElementById('startAddress').value = '';
+            document.getElementById('endAddress').value = '';
+        });
+
+        // Controleur Temporel suivant les ombrages des batiments
+        var now, timeRange, dateRange, timeRangeLabel, dateRangeLabel;
+        function changeDate() {
+            var Y = now.getFullYear(),
+                M = now.getMonth(),
+                D = now.getDate(),
+                h = now.getHours(),
+                m = 0;
+
+            timeRangeLabel.innerText = pad(h) + ':' + pad(m);
+            dateRangeLabel.innerText = Y + '-' + pad(M + 1) + '-' + pad(D);
+
+            osmb.date(new Date(Y, M, D, h, m));
+        }
+
+        function onTimeChange() {
+            now.setHours(this.value);
+            now.setMinutes(0);
+            changeDate();
+        }
+
+        function onDateChange() {
+            now.setMonth(0);
+            now.setDate(this.value);
+            changeDate();
+        }
+
+        function pad(v) {
+            return (v < 10 ? '0' : '') + v;
+        }
+
+        timeRange = document.getElementById('time');
+        dateRange = document.getElementById('date');
+        timeRangeLabel = document.querySelector('*[for=time]');
+        dateRangeLabel = document.querySelector('*[for=date]');
+
+        now = new Date();
+        changeDate();
+
+        var Jan1 = new Date(now.getFullYear(), 0, 1);
+        dateRange.value = Math.ceil((now - Jan1) / 86400000);
+
+        timeRange.value = now.getHours();
+
+        timeRange.addEventListener('change', onTimeChange);
+        dateRange.addEventListener('change', onDateChange);
+        timeRange.addEventListener('input', onTimeChange);
+        dateRange.addEventListener('input', onDateChange);
+
+        // Onglet reccherche de lieux (loupe)
+        var geocoder = L.Control.geocoder({
+            defaultMarkGeocode: true
+        }).addTo(map);
+
+        // Ajouter notre Logo à la carte
+        L.Control.Watermark = L.Control.extend({
+            onAdd: function (map) {
+                var img = L.DomUtil.create('img');
+
+                img.src = 'C:/Users/kaize/OneDrive/Bureau//Datathon_Rouen/Logo_GeoTech.png';
+                img.style.width = '70px';
+
+                return img;
+            },
+        });
+
+        L.control.watermark = function (opts) {
+            return new L.Control.Watermark(opts);
+        }
+
+        L.control.watermark({ position: 'bottomright' }).addTo(map);
+
+        // Couche France GeoJSON
+        var Contours_Fr = [
+            { url: 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/data/FranceC.geojson', name: 'Limite de la France' }
+        ];
+
+        // Stocker les couches GeoJSON
+        var geojsonLayersContours_Fr = {};
+
+        // Style avec couleur de fond visible
+        var geojsonStyle1 = {
+            color: '#F8F4FF',       // Couleur des bordures
+            weight: 0.3,            // Épaisseur des bordures
+            fillColor: '#E5E4E2',   // Couleur de remplissage
+            fillOpacity: 0.5        // Niveau de transparence (0.5 = 50% visible)
+        };
+        // Charger et stocker les couches GeoJSON sans les afficher
+        Contours_Fr.forEach(function (file) {
+            fetch(file.url)
+                .then(response => response.json())
+                .then(data => {
+                    var layer = L.geoJSON(data, { style: geojsonStyle1 }).addTo(map);
+                    geojsonLayersContours_Fr[file.name] = layer; // Stocker la couche
+                })
+        });
+
+        // Couche France GeoJSON
+        var Contours_M = [
+            { url: 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/data/Monde.geojson', name: 'Limite du Monde' }
+        ];
+
+        // Stocker les couches GeoJSON
+        var geojsonLayersContours_M = {};
+
+        // Style avec couleur de fond visible
+        var geojsonStyle2 = {
+            color: '#F8F4FF',       // Couleur des bordures
+            weight: 0.4,            // Épaisseur des bordures
+            fillColor: '#E5E4E2',   // Couleur de remplissage
+            fillOpacity: 0.8        // Niveau de transparence (0.8 = 80% visible)
+        };
+
+
+        Contours_M.forEach(function (file) {
+            fetch(file.url)
+                .then(response => response.json())
+                .then(data => {
+                    // Ajouter le GeoJSON avec le style personnalisé
+                    var layer = L.geoJSON(data, { style: geojsonStyle2 }).addTo(map);
+                    geojsonLayersContours_M[file.name] = layer; // Stocker la couche
+                });
+        });
+
+        var Contours_dep = [
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Calvados.geojson', name: 'Dep Calvados' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Eure.geojson', name: 'Dep Eure' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Manche.geojson', name: 'Dep Manche' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Orne.geojson', name: 'Dep Orne' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Seine-Maritime.geojson', name: 'Dep Seine-Maritime' }
+        ];
+
+        // Stocker les couches GeoJSON
+        var geojsonLayersContours_dep = {};
+
+        // Style d'affichage
+        var geojsonStyle = {
+            color: '#00FFFF',      // Couleur des bordures
+            weight: 2,            // Épaisseur des bordures
+            fillOpacity: 0       // Aucune opacité de remplissage
+        };
+
+        Contours_dep.forEach(function (file) {
+            fetch(file.url)
+                .then(response => response.json())
+                .then(data => {
+                    // Ajouter le GeoJSON
+                    var layer = L.geoJSON(data, { style: geojsonStyle }).addTo(map);
+                    geojsonLayersContours_dep[file.name] = layer; // Stocker la couche
+                });
+        });
+
+        // Styles pour les icônes personnalisées
+        function createCustomIcon(imageUrl) {
+            return L.divIcon({
+                html: `<div style="background: url('${imageUrl}') no-repeat center center; 
+                         background-size: cover; 
+                         border: 1px solid white; 
+                         border-radius: 50%; 
+                         width: 30px; 
+                         height: 30px;">
+                   </div>`,
+                className: '' // Supprimer les styles par défaut
+            });
+        }
+
+        // Fonction pour personnaliser les clusters (une seule image par groupe)
+        function createClusterCustomIcon(cluster) {
+            const markers = cluster.getAllChildMarkers(); // Récupérer tous les marqueurs dans le cluster
+            const firstMarker = markers[0]; // Utiliser le premier marqueur pour le visuel
+            const imageUrl =
+                firstMarker?.options.icon.options.html.match(/url\('(.+?)'\)/)?.[1] || 'default.png'; // Image principale du cluster
+
+            return L.divIcon({
+                html: `<div style="background: url('${imageUrl}') no-repeat center center; 
+                            background-size: cover; 
+                            border: 1px solid gray; 
+                            border-radius: 50%; 
+                            width: 30px; 
+                            height: 30px;">
+                   </div>`,
+                className: '' // Supprimer les styles par défaut
+            });
+        }
+
+        // Initialisation des clusters pour Mobilier et Architecture
+        var mobilierClusterGroup = L.markerClusterGroup({
+            iconCreateFunction: createClusterCustomIcon // Une seule image par cluster
+        });
+        var architectureClusterGroup = L.markerClusterGroup({
+            iconCreateFunction: createClusterCustomIcon // Une seule image par cluster
+        });
+
+        // Fonction pour les pop-ups
+        function onEachFeature(feature, layer) {
+            var popupContent = `
+            <div class="popup-title">${feature.properties.COM || 'Inconnu'}</div>
+            <div class="popup-description">${feature.properties.TICO || 'Pas de description'}</div>
+            <img src="${feature.properties.image || ''}" style="max-width: 100px;" />
+            <a href="${feature.properties.DOSURL || '#'}" target="_blank">Plus d'infos</a>
+        `;
+            layer.bindPopup(popupContent);
+        }
+
+        // Fonction pour créer les couches avec des icônes personnalisées
+        function createLayerWithCustomIcons(geojsonData, clusterGroup) {
+            const layer = L.geoJSON(geojsonData, {
+                pointToLayer: (feature, latlng) => {
+                    const imageUrl = feature.properties.image || 'default.png';
+                    return L.marker(latlng, { icon: createCustomIcon(imageUrl) });
+                },
+                onEachFeature: onEachFeature
+            });
+            clusterGroup.addLayer(layer); // Ajouter les marqueurs au groupe de clusters
+        }
+
+        // Chargement des couches Mobilier
+        var Mobilier = [
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Mobilier_Calvados.geojson', name: 'Mobilier Calvados' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Mobilier_Eure.geojson', name: 'Mobilier Eure' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Mobilier_Manche.geojson', name: 'Mobilier Manche' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Mobilier_Orne.geojson', name: 'Mobilier Orne' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Mobilier_Seine-Maritime.geojson', name: 'Mobilier Seine-Maritime' }
+        ];
+
+        Mobilier.forEach(file => {
+            fetch(file.url)
+                .then(res => res.json())
+                .then(data => {
+                    createLayerWithCustomIcons(data, mobilierClusterGroup); // Ajouter au cluster Mobilier
+                });
+        });
+
+        // Chargement des couches Architecture
+        var Architecture = [
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Architecture_Calvados.geojson', name: 'Architecture Calvados' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Architecture_Eure.geojson', name: 'Architecture Eure' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Architecture_Manche.geojson', name: 'Architecture Manche' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Architecture_Orne.geojson', name: 'Architecture Orne' },
+            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Architecture_Seine-Maritime.geojson', name: 'Architecture Seine-Maritime' }
+        ];
+
+        Architecture.forEach(file => {
+            fetch(file.url)
+                .then(res => res.json())
+                .then(data => {
+                    createLayerWithCustomIcons(data, architectureClusterGroup); // Ajouter au cluster Architecture
+                });
+        });
+
+        // Boutons pour afficher/masquer Mobilier et Architecture
+        var mobilierVisible = false;
+        var architectureVisible = false;
+
+        // Conteneur pour les boutons
+        var layerToggleContainer = L.control({ position: 'bottomright' });
+
+        layerToggleContainer.onAdd = function () {
+            var container = L.DomUtil.create('div', 'layer-toggle-container');
+
+            // Bouton Architecture
+            var architectureButton = L.DomUtil.create('button', 'layer-toggle', container);
+            architectureButton.innerHTML = 'Architecture';
+            L.DomEvent.on(architectureButton, 'click', () => {
+                architectureVisible = !architectureVisible;
+                toggleClusters(architectureClusterGroup, architectureVisible, architectureButton, 'Architecture');
+            });
+
+            // Bouton Mobilier
+            var mobilierButton = L.DomUtil.create('button', 'layer-toggle', container);
+            mobilierButton.innerHTML = 'Mobilier';
+            L.DomEvent.on(mobilierButton, 'click', () => {
+                mobilierVisible = !mobilierVisible;
+                toggleClusters(mobilierClusterGroup, mobilierVisible, mobilierButton, 'Mobilier');
+            });
+
+            return container;
+        };
+
+        // Ajouter le conteneur à la carte
+        layerToggleContainer.addTo(map);
+
+        // Fonction pour afficher/masquer les clusters
+        function toggleClusters(clusterGroup, isVisible, button, name) {
+            if (isVisible) {
+                map.addLayer(clusterGroup); // Ajouter le groupe de clusters à la carte
+                button.innerHTML = `${name}`;
+                button.classList.add('active');
+            } else {
+                map.removeLayer(clusterGroup); // Retirer le groupe de clusters de la carte
+                button.innerHTML = `${name}`;
+                button.classList.remove('active');
+            }
+        }
+
+        // Fonction pour afficher ou cacher le sidebar
+        function toggleSidebar(show) {
+            const sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("active", show);
+        }
+
+        // Fonction pour mettre à jour la liste des patrimoines
+        function updatePatrimoineList(features) {
+            const listElement = document.getElementById("patrimoineList");
+            listElement.innerHTML = ""; // Vider la liste existante
+
+            features.forEach(feature => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+            <strong>${feature.properties.COM || 'Inconnu'}</strong>
+            <p>${feature.properties.TICO || 'Pas de description'}</p>
+            <img src="${feature.properties.image || ''}" style="max-width: 100%;" />
+        `;
+                listElement.appendChild(li);
+            });
+
+            toggleSidebar(true); // Afficher le sidebar
+        }
+
+        // Fonction pour générer un isochrone et l'ajouter à la carte
+        function generateIsochrones(duration) {
+            const requestBody = {
+                locations: [userLocation],
+                range: [duration],
+                range_type: "time"
+            };
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': orsApiKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    // Déterminer la couleur du buffer
+                    const colors = {
+                        900: '#00ff00', // 15 mins
+                        1800: '#ffff00', // 30 mins
+                        2700: '#ffa500', // 45 mins
+                        3600: '#ff0000' // 1 heure
+                    };
+                    const color = colors[duration] || '#0000ff'; // Définir la couleur
+
+                    // Créer un isochrone et l'ajouter à la carte
+                    const isochroneLayer = L.geoJSON(data, {
+                        style: { color: color, weight: 2, fillOpacity: 0.2 }
+                    }).addTo(map);
+
+                    // Sauvegarder la couche dans l'objet isochroneLayers
+                    if (!isochroneLayers[duration]) {
+                        isochroneLayers[duration] = [];
+                    }
+                    isochroneLayers[duration].push(isochroneLayer);
+
+                    // Filtrer les patrimoines à l'intérieur de l'isochrone
+                    const patrimoineFeatures = [];
+                    [mobilierClusterGroup, architectureClusterGroup].forEach(group => {
+                        group.eachLayer(layer => {
+                            if (layer.feature && isochroneLayer.getBounds().contains(layer.getLatLng())) {
+                                patrimoineFeatures.push(layer.feature);
+                            }
+                        });
+                    });
+
+                    // Mettre à jour la liste des patrimoines
+                    updatePatrimoineList(patrimoineFeatures);
+                })
+                .catch(error => console.error("Erreur lors de la génération des isochrones :", error));
+        }
+
+        // Fonction pour supprimer un isochrone et vider la liste
+        function removeIsochrones(duration) {
+            if (isochroneLayers[duration]) {
+                isochroneLayers[duration].forEach(layer => map.removeLayer(layer));
+                delete isochroneLayers[duration];
+            }
+            // Vider la liste des patrimoines
+            document.getElementById("patrimoineList").innerHTML = '';
+            toggleSidebar(false); // Fermer le sidebar
+        }
+
+        // Fonction pour afficher ou masquer un isochrone
+        function toggleIsochrones(duration) {
+            if (!userLocation) {
+                alert("Votre position non définie.");
+                return;
+            }
+
+            // Si l'isochrone pour cette durée est déjà ajouté, le retirer
+            if (isochroneLayers[duration]) {
+                removeIsochrones(duration);
+            } else {
+                generateIsochrones(duration);
+            }
+        }
+
+    </script>
+</body>
+
+</html>

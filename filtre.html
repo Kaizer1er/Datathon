@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Filtrez par préférences</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            color: #4CAF50;
+        }
+
+        #filter-container {
+            text-align: center;
+            background-color: #4CAF50;
+            border-radius: 50px;
+            width: 70%;
+            margin: 0 auto
+        }
+
+        #main-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            height: calc(100vh - 100px);
+            padding: 10px;
+        }
+
+        #results-container {
+            grid-column: 1 / 2;
+            grid-row: 1 / 3;
+            text-align: center;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+
+        #image-display {
+            grid-column: 2 / 3;
+            grid-row: 1 / 2;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            height: 300px;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        #image-display img {
+            max-height: 250px;
+            max-width: 250px;
+            object-fit: contain;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+        }
+
+        #image-display .image-name {
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        #chart-container {
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+        }
+
+        #chart {
+            max-width: 100%;
+            max-height: 340px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            text-align: left;
+        }
+
+        th,
+        td {
+            padding: 10px;
+        }
+
+        td {
+            text-align: left;
+        }
+
+        /* Button styles */
+        .show-buttons {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Filtrez par préférences</h1>
+    <div id="filter-container">
+        <label for="type">Type de patrimoine :</label>
+        <select id="type">
+            <option value="">Tous</option>
+            <option value="Mobilier">Mobilier</option>
+            <option value="Architecture">Architecture</option>
+        </select>
+
+        <label for="epoque">Époque :</label>
+        <select id="epoque">
+            <option value="">Toutes</option>
+            <option value="Medieval">Médiéval</option>
+            <option value="Moderne">Moderne</option>
+            <option value="Contemporain">Contemporain</option>
+        </select>
+
+        <label for="departement">Département :</label>
+        <select id="departement">
+            <option value="">Tous</option>
+            <option value="Calvados">Calvados</option>
+            <option value="Manche">Manche</option>
+            <option value="Seine-Maritime">Seine-Maritime</option>
+            <option value="Orne">Orne</option>
+            <option value="Eure">Eure</option>
+        </select>
+
+        <button id="filterBtn">Filtrer</button>
+    </div>
+
+    <div id="main-container">
+        <div id="top-section">
+            <div id="image-display"></div>
+            <div id="chart-container">
+                <h2>Statistiques</h2>
+                <canvas id="chart"></canvas>
+            </div>
+        </div>
+
+        <div id="results-container">
+            <h2>Résultats</h2>
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Commune</th>
+                        <th>Époque</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Les résultats filtrés apparaîtront ici -->
+                </tbody>
+            </table>
+            <div class="show-buttons">
+                <button id="showAllBtn">Afficher tout</button>
+                <button id="showFirst10Btn">Réduire</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let combinedData = [];
+        let chartInstance;
+        let currentImageIndex = 0;
+        let imageTimer;
+        let filteredData = [];
+
+        Promise.all([
+            axios.get('https://raw.githubusercontent.com/abdilabd/test/main/bd_mobilier.geojson'),
+            axios.get('https://raw.githubusercontent.com/abdilabd/test/main/bd_architecture.geojson')
+        ]).then(responses => {
+            const data1 = responses[0].data.features;
+            const data2 = responses[1].data.features;
+            combinedData = [...data1, ...data2];
+        }).catch(error => console.error('Erreur lors du chargement des fichiers GeoJSON :', error));
+
+        document.getElementById('filterBtn').addEventListener('click', () => {
+            const type = document.getElementById('type').value;
+            const epoque = document.getElementById('epoque').value;
+            const departement = document.getElementById('departement').value;
+
+            filteredData = combinedData.filter(feature => {
+                const props = feature.properties;
+                return (!type || props.Type === type) &&
+                    (!epoque || props.Epoque === epoque) &&
+                    (!departement || props.Departement === departement);
+            });
+
+            updateImageDisplay(filteredData);
+            updateTable(filteredData.slice(0, 10));
+            updateChart(type, epoque, departement, filteredData);
+        });
+
+        function updateImageDisplay(data) {
+            const imageDisplay = document.getElementById('image-display');
+            imageDisplay.innerHTML = ''; // Clear current image
+
+            if (imageTimer) clearInterval(imageTimer); // Clear previous interval if any
+
+            if (data.length > 0) {
+                currentImageIndex = 0;
+                showImage(currentImageIndex);
+
+                imageTimer = setInterval(() => {
+                    currentImageIndex = (currentImageIndex + 1) % data.length;
+                    showImage(currentImageIndex);
+                }, 3500); // Change image every 5 seconds
+            }
+        }
+
+
+        function showImage(index) {
+            const imageDisplay = document.getElementById('image-display');
+            const feature = filteredData[index];
+
+            const img = document.createElement('img');
+            img.src = feature.properties.image;
+            img.alt = feature.properties.TICO || 'Image';
+            img.dataset.tico = feature.properties.TICO || 'Sans titre';
+
+            // Ajouter un effet de transition de fondu et de mouvement
+            img.style.opacity = 0;
+            img.style.transform = 'scale(0.95)';
+
+            const name = document.createElement('div');
+            name.classList.add('image-name');
+            name.textContent = img.dataset.tico;
+
+            imageDisplay.innerHTML = ''; // Clear the previous image
+
+            imageDisplay.appendChild(img);
+            imageDisplay.appendChild(name);
+
+            // Forcer une réinitialisation avant d'appliquer l'animation
+            setTimeout(() => {
+                img.style.opacity = 1;
+                img.style.transform = 'scale(1)';
+            }, 50); // délai avant de rendre l'image visible
+        }
+
+
+        function updateTable(data) {
+            const tbody = document.getElementById('resultsTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            data.forEach(feature => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${feature.properties.TICO || 'N/A'}</td>
+                    <td>${feature.properties.COM || 'N/A'}</td>
+                    <td>${feature.properties.Epoque || 'N/A'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateChart(type, epoque, departement, data) {
+            let labels = [];
+            let counts = [];
+
+            if (type && !epoque) {
+                const epochs = ['Medieval', 'Moderne', 'Contemporain'];
+                labels = epochs;
+                counts = epochs.map(ep => data.filter(d => d.properties.Epoque === ep).length);
+            } else if (type && epoque && !departement) {
+                labels = Array.from(new Set(data.map(d => d.properties.Departement)));
+                counts = labels.map(dep => data.filter(d => d.properties.Departement === dep).length);
+            } else if (type && epoque && departement) {
+                const communeCounts = {};
+                data.forEach(d => {
+                    const commune = d.properties.COM;
+                    if (commune) {
+                        communeCounts[commune] = (communeCounts[commune] || 0) + 1;
+                    }
+                });
+                const sortedCommunes = Object.entries(communeCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                labels = sortedCommunes.map(entry => entry[0]);
+                counts = sortedCommunes.map(entry => entry[1]);
+            }
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('chart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9F40'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+
+            ctx.canvas.style.width = '400px';
+            ctx.canvas.style.height = '500px';
+        }
+
+        document.getElementById('showAllBtn').addEventListener('click', () => {
+            updateTable(filteredData);
+        });
+
+        document.getElementById('showFirst10Btn').addEventListener('click', () => {
+            updateTable(filteredData.slice(0, 10));
+        });
+    </script>
+</body>
+
+</html>
