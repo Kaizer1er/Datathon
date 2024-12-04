@@ -234,11 +234,11 @@
         }
 
         .sidebar {
-            position: absolute;
+            position: fixed;
             margin-top: 10px;
             left: -350px;
             width: 285px;
-            height: 482px;
+            height: 550px;
             background-color: rgba(255, 255, 255, 0.816);
             box-shadow: 2px 0 5px;
             border-radius: 50px;
@@ -246,11 +246,14 @@
             text-align: center;
             transition: left 0.3s ease;
             z-index: 1000;
+            top: 50%;
+            /* Garder l'écart à gauche */
+            transform: translateY(-50%)
         }
 
         /* Style du sidebar */
         .sidebar.active {
-            left: 0;
+            left: 10px;
         }
 
         #closeSidebar {
@@ -722,7 +725,7 @@
             onAdd: function (map) {
                 var img = L.DomUtil.create('img');
 
-                img.src = 'C:/Users/kaize/OneDrive/Bureau//Datathon_Rouen/Logo_GeoTech.png';
+                img.src = 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/Logo_GeoTech.png';
                 img.style.width = '70px';
 
                 return img;
@@ -737,7 +740,7 @@
 
         // Couche France GeoJSON
         var Contours_Fr = [
-            { url: 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/data/FranceC.geojson', name: 'Limite de la France' }
+            { url: 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/data/France.geojson', name: 'Limite de la France' }
         ];
 
         // Stocker les couches GeoJSON
@@ -788,11 +791,11 @@
         });
 
         var Contours_dep = [
-            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Calvados.geojson', name: 'Dep Calvados' },
-            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Eure.geojson', name: 'Dep Eure' },
-            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Manche.geojson', name: 'Dep Manche' },
-            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Orne.geojson', name: 'Dep Orne' },
-            { url: 'https://raw.githubusercontent.com/abdilabd/test/main/Dep_Seine-Maritime.geojson', name: 'Dep Seine-Maritime' }
+            { url: 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/data/Dep_Calvados.geojson', name: 'Dep Calvados' },
+            { url: 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/data/Dep_Eure.geojson', name: 'Dep Eure' },
+            { url: 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/data/Dep_Manche.geojson', name: 'Dep Manche' },
+            { url: 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/data/Dep_Orne.geojson', name: 'Dep Orne' },
+            { url: 'https://raw.githubusercontent.com/Kaizer1er/Datathon_Normandie/main/data/Dep_Seine-Maritime.geojson', name: 'Dep Seine-Maritime' }
         ];
 
         // Stocker les couches GeoJSON

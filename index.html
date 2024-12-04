@@ -4,15 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Norm'Aventure</title>
+    <title>Norman'Explore</title>
     <style>
         /* Réinitialisation de base */
-        body,h1,h2,h3,p,ul,li,a,input,textarea,button {
+        body,h1,h2,p,ul,li,a,input,textarea,button {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        h2{
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        p{
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        ul{
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
         body {
             font-family: 'Arial', sans-serif;
             line-height: 1.6;
@@ -107,6 +119,7 @@
             border: 1px solid #ddd;
             border-radius: 30px;
             background-color: #f9f9f9;
+            margin-bottom: 2rem;
         }
 
         footer {
@@ -137,7 +150,7 @@
         <div class="logo-container">
             <img src="https://www.flagsonline.fr/uploads/2019-11-27/1200-0/Region_Normandie_drapeau.jpg"
                 alt="Région Normandie Logo">
-            <div class="app-name">Norm'Aventure</div>
+            <div class="app-name">Norman'Explore</div>
         </div>
 
         <!-- Section droite : Menu de navigation -->
@@ -146,7 +159,7 @@
                 <li><a href="">Accueil</a></li>
                 <li><a href="Webmap.html" target="_blank">Webmap</a></li>
                 <li><a href="Parcours.html" target="_blank">Mobilité verte</a></li>
-                <li><a href="contribution.html" target="_blank">Contribution</a></li>
+                <li><a href="Contribution.html" target="_blank">Contribution</a></li>
                 <li><a href="Equipe.html" target="_blank">Équipe</a></li>
             </ul>
         </nav>
@@ -170,17 +183,18 @@
 
             <!-- Informations textuelles -->
             <div class="info-text">
-                <h2>Norm'Aventure</h2>
+                <h2>Norman'Explore</h2>
                 <p>
-                    Bienvenue dans notre application OpenNormandie ! Ici, vous pouvez explorer les magnifiques paysages,
-                    l'architecture riche, et le patrimoine culturel de la Normandie.
+                    Bienvenue dans notre application Norman'Explore ! La solution que nous proposons répond à la problématique de l'accessibilité et de la valorisation du patrimoine Normand (mobilier et architectural). Elle permet de faciliter la découverte de ces patrimoines à travers des itinéraires adaptés à divers types de mobilité ; des mobilités douces(pied et vélo) et aussi en voiture.
+                    L'idée inovante de cette application, est d'offrir aux utilisateurs un angle de contribution à l'enrichissement des bases de données open data de la région et de pouvour avoir une vue d'ensemble de la santé des dits patrimoines.
                 </p>
                 <p>
-                    Cette application inclut :
+                    Cette application inclut divers possibilités :
                 <ul>
-                    <li>Descriptions historiques</li>
-                    <li>Informations touristiques</li>
-                    <li>Événements à venir</li>
+                    <li>Accessibilité des patrimoines</li>
+                    <li>Valorisation des ressources culturelles</li>
+                    <li>Encouragement à des pratiques touristiques éco-responsable via les parcours à mobilité douce</li>
+                    <li>Enrichissement collaboratif et actualisation en temps réel</li>
                 </ul>
                 </p>
             </div>
@@ -205,7 +219,7 @@
                 // Passer à l'image suivante
                 currentIndex = (currentIndex + 1) % images.length;
 
-                // Afficher la nouvelle image
+                // Affichage des images d'accueil
                 images[currentIndex].classList.add('active');
             }, 3000); // Changer toutes les 3 secondes
         });
